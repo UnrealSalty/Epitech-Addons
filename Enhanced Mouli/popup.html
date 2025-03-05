@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Enhanced Epitech Percentages</title>
+  <style>
+    body {
+      width: 300px;
+      font-family: 'Roboto', Arial, sans-serif;
+      padding: 15px;
+      margin: 0;
+      background-color: #f7f9fc;
+      color: #333;
+    }
+    h1 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #3f51b5;
+      text-align: center;
+    }
+    .info-section {
+      margin-bottom: 15px;
+      background-color: white;
+      padding: 12px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .info-title {
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #3f51b5;
+    }
+    p {
+      margin: 8px 0;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .setting {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 10px 0;
+    }
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+    }
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      border-radius: 22px;
+      transition: .4s;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: .4s;
+    }
+    input:checked + .slider {
+      background-color: #3f51b5;
+    }
+    input:checked + .slider:before {
+      transform: translateX(18px);
+    }
+    .footer {
+      font-size: 12px;
+      text-align: center;
+      color: #666;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Enhanced Epitech Percentages</h1>
+  
+  <div class="info-section">
+    <div class="info-title">About</div>
+    <p>This extension enhances your Epitech moulinette experience by adding detailed skill percentages and visual progress tracking.</p>
+  </div>
+  
+  <div class="info-section">
+    <div class="info-title">Settings</div>
+    <div class="setting">
+      <span>Auto-expand skill details</span>
+      <label class="toggle">
+        <input type="checkbox" id="auto-expand">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="setting">
+      <span>Use high contrast colors</span>
+      <label class="toggle">
+        <input type="checkbox" id="high-contrast">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+  
+  <div class="footer">
+    Enhanced Mouli v1.0.1
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
