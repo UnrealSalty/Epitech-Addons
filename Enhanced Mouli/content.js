@@ -1,5 +1,6 @@
 const projects = {};
 const skillsCache = {};
+const expandedSkills = {};
 let settings = {
   autoExpand: false,
   highContrast: false
@@ -117,15 +118,15 @@ function injectStyles() {
   document.head.appendChild(styleEl);
 }
 function debugLog() {
-  console.log("EnhancedEpitechPercentages:", ...arguments);
+  console.log("EnhancedMouli:", ...arguments);
 }
 
 function debugWarn() {
-  console.warn("EnhancedEpitechPercentages:", ...arguments);
+  console.warn("EnhancedMouli:", ...arguments);
 }
 
 function debugError() {
-  console.error("EnhancedEpitechPercentages:", ...arguments);
+  console.error("EnhancedMouli:", ...arguments);
 }
 function includes(a, b) {
   const len = a.length;
@@ -248,7 +249,7 @@ function setEnhancedPercentage(statusElement, projectName, percentage) {
     const skills = skillsCache[projectName];
     const skillDetails = document.createElement('div');
     skillDetails.className = 'epi-skill-details';
-    skillDetails.style.display = settings.autoExpand ? 'block' : 'none';
+    skillDetails.style.display = (settings.autoExpand || expandedSkills[projectName]) ? 'block' : 'none';
     
     const skillsList = Object.entries(skills).map(([skillName, skillData]) => {
       const passRate = skillData.passed / skillData.count * 100;
@@ -267,11 +268,13 @@ function setEnhancedPercentage(statusElement, projectName, percentage) {
     skillDetails.innerHTML = skillsList;
     const expandBtn = document.createElement('button');
     expandBtn.className = 'epi-expand-btn';
-    expandBtn.textContent = settings.autoExpand ? 'Hide skill details' : 'Show skill details';
-    expandBtn.onclick = () => {
+    expandBtn.textContent = (settings.autoExpand || expandedSkills[projectName]) ? 'Hide skill details' : 'Show skill details';
+    expandBtn.onclick = (event) => {
+      event.stopPropagation();
       const isHidden = skillDetails.style.display === 'none';
       skillDetails.style.display = isHidden ? 'block' : 'none';
       expandBtn.textContent = isHidden ? 'Hide skill details' : 'Show skill details';
+      expandedSkills[projectName] = isHidden;
     };
     
     container.appendChild(expandBtn);
