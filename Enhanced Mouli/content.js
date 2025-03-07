@@ -221,19 +221,33 @@ function getColorForPercentage(percentage) {
     return '#f44336';
   }
 }
-function setEnhancedPercentage(statusElement, projectName, percentage) {
+
+function setEnhancedPercentage(statusElement, projectName, percentage, error_label) {
   const color = getColorForPercentage(percentage);
   const container = document.createElement('div');
   container.className = 'epi-percentage-container';
+  
   if (settings.highContrast) {
     container.classList.add('high-contrast');
   }
+  
+  if (error_label !== null && error_label !== undefined) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'mdl-color-text--accent';
+    errorDiv.style.textAlign = 'center';
+    errorDiv.style.marginBottom = '10px';
+    errorDiv.style.fontWeight = 'bold';
+    errorDiv.textContent = error_label;
+    container.appendChild(errorDiv);
+  }
+  
   const percentageText = document.createElement('div');
   percentageText.className = 'epi-percentage-text';
   percentageText.innerHTML = `
     <span>Passed - ${percentage}%</span>
     <span>${percentage < 100 ? `${100 - percentage}% remaining` : 'Complete'}</span>
   `;
+  
   const progressBar = document.createElement('div');
   progressBar.className = 'epi-progress-bar';
   
@@ -245,6 +259,7 @@ function setEnhancedPercentage(statusElement, projectName, percentage) {
   progressBar.appendChild(progressFill);
   container.appendChild(percentageText);
   container.appendChild(progressBar);
+  
   if (skillsCache[projectName]) {
     const skills = skillsCache[projectName];
     const skillDetails = document.createElement('div');
@@ -279,7 +294,7 @@ function setEnhancedPercentage(statusElement, projectName, percentage) {
     
     container.appendChild(expandBtn);
     container.appendChild(skillDetails);
-    const failedSkills = Object.entries(skills).filter(([_, skillData]) => 
+    const failedSkills = Object.entries(skills).filter(([_, skillData]) =>
       skillData.passed < skillData.count
     );
     
@@ -296,16 +311,32 @@ function setEnhancedPercentage(statusElement, projectName, percentage) {
       container.appendChild(summary);
     }
   }
+  
   statusElement.innerHTML = '';
   statusElement.appendChild(container);
 }
+
 async function updatePercentages() {
   debugLog("Updating percentages...");
   document.querySelectorAll(".remove-on-percentage-update").forEach(e => e.remove());
-  const projectStatusElements = document.querySelectorAll(".mdl-color-text--primary.mdl-typography--title-color-contrast.mdl-cell");
-  
+  const projectStatusElements = document.querySelectorAll(".mdl-typography--title-color-contrast.mdl-cell");
+  let error_label = null;
+
   for (const projectStatus of projectStatusElements) {
-    if (!projectStatus.textContent.includes("Prerequisites met") && !projectStatus.textContent.trim().startsWith("Passed - ")) continue;
+    if (projectStatus.getAttribute('data-epi-processed') === 'true') {
+      continue;
+    }
+    projectStatus.setAttribute('data-epi-processed', 'true');
+    const computedStyle = window.getComputedStyle(projectStatus);
+    const textColor = computedStyle.color;
+    const rgbValues = textColor.match(/\d+/g);
+    if (rgbValues && (parseInt(rgbValues[0]) !== 63 || parseInt(rgbValues[1]) !== 81 || parseInt(rgbValues[2]) !== 181)) {
+      error_label = projectStatus.textContent;
+      console.log(error_label);
+    } else {
+      error_label = null;
+    }
+
     const projectCardElement = findParentBySelector(projectStatus, ".mdl-card");
     if (!projectCardElement) {
       debugLog("Project card not found!");
@@ -333,9 +364,10 @@ async function updatePercentages() {
     const passed = skillsArr.map(s => s.passed).reduce((prev, curr) => prev + curr, 0);
     const count = skillsArr.map(s => s.count).reduce((prev, curr) => prev + curr, 0);
     const percentage = (passed / count * 100).toFixed(0);
-    setEnhancedPercentage(projectStatus, projectName, percentage);
+    setEnhancedPercentage(projectStatus, projectName, percentage, error_label);
   }
 }
+
 function initialize() {
   debugLog("Initializing Enhanced Epitech Percentages...");
   injectStyles();

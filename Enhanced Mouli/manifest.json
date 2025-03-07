@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Enhanced Mouli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Enhances your visual experience in the epitech moulinette.",
   "icons": {
     "16": "icons/icon16.png",
