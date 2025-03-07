@@ -1,7 +1,7 @@
 # 🚀 Epitech Addons
 
 <div align="center">
-  <img src="./assets/img/epitech-addons-logo.png" alt="Epitech Addons Logo" width="200"/>
+  <img src="./assets/img/epitechaddons-logo.png" alt="Epitech Addons Logo" width="200"/>
   <br>
   <h3>Browser extensions and tools to supercharge your Epitech experience</h3>
   
