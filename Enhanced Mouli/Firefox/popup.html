@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Mouli</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+    
+    :root {
+      --primary: #5D5FEF;
+      --primary-light: #7B7EFF;
+      --primary-dark: #4945E4;
+      --accent: #FF6B6B;
+      --success: #0CD68A;
+      --warning: #FFB800;
+      --danger: #F94646;
+      --background: #0A1020;
+      --surface: #141E33;
+      --surface-light: #1C2942;
+      --text: #F0F4FD;
+      --text-secondary: #A1AECB;
+      --border: #2A3654;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Manrope', sans-serif;
+    }
+    
+    body {
+      width: 320px;
+      background-color: var(--background);
+      color: var(--text);
+      padding: 20px;
+      animation: fadeInPage 0.5s ease forwards;
+    }
+    
+    @keyframes fadeInPage {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      transform: translateY(-10px);
+      opacity: 0;
+      animation: slideDown 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+      width: 100%;
+      text-align: center;
+    }
+    
+    @keyframes slideDown {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 0 auto;
+    }
+    
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+    
+    .logo-text {
+      font-weight: 700;
+      font-size: 20px;
+      background: linear-gradient(90deg, var(--primary-light), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .section {
+      background-color: var(--surface);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      transform: translateY(10px);
+      opacity: 0;
+      animation: fadeUp 0.5s ease forwards;
+    }
+    
+    .section:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+    
+    .section:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+    
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--primary-light);
+    }
+    
+    .text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+    
+    .setting {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      opacity: 0;
+      animation: fadeIn 0.4s ease forwards;
+    }
+    
+    .setting:nth-child(2) {
+      animation-delay: 0.3s;
+    }
+    
+    .setting:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+    
+    .setting-label {
+      font-size: 14px;
+      color: var(--text);
+    }
+    
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 22px;
+    }
+    
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--surface-light);
+      border-radius: 22px;
+      transition: .3s;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text);
+      border-radius: 50%;
+      transition: .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(22px);
+      background-color: white;
+    }
+    
+    .slider:hover {
+      box-shadow: 0 0 8px rgba(93, 95, 239, 0.3);
+    }
+    
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards;
+      animation-delay: 0.5s;
+    }
+    
+    .version {
+      display: inline-block;
+      padding: 3px 8px;
+      background-color: var(--surface-light);
+      border-radius: 12px;
+      font-size: 10px;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <img src="icons/icon128.png" alt="Enhanced Mouli Logo" class="logo-icon">
+      <span class="logo-text">Enhanced Mouli</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">About</div>
+    <p class="text">This extension enhances your Epitech moulinette experience with detailed skill tracking, visual progress indicators, and focus recommendations.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Settings</div>
+    <div class="setting">
+      <span class="setting-label">Auto-expand skill details</span>
+      <label class="toggle">
+        <input type="checkbox" id="auto-expand">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="setting">
+      <span class="setting-label">Use high contrast colors</span>
+      <label class="toggle">
+        <input type="checkbox" id="high-contrast">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Epitech Addons • Open-Source</span>
+    <div class="version">v1.0.5</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
