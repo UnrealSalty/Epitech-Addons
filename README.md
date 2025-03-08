@@ -48,8 +48,6 @@ We welcome contributions from all Epitech students! Whether you want to fix a bu
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-See our [Contributing Guide](CONTRIBUTING.md) for more details.
-
 ## 📜 License
 
 This project is licensed under the Apache V2 License - see the [LICENSE](LICENSE) file for details.
