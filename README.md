@@ -35,7 +35,7 @@ Supercharge your Moulinette experience with detailed skill tracking, visual prog
 - [Download Enhanced Mouli](https://epitechaddons.com/enhanced_mouli)
 
 **Credits**
-- https://chromewebstore.google.com/detail/my-epitech-percentages/hepfpnmpnjacajnfkpmmmhhbiaggddin?pli=1
+- [Original Extension](https://chromewebstore.google.com/detail/my-epitech-percentages/hepfpnmpnjacajnfkpmmmhhbiaggddin?pli=1)
 
 ## 🔮 Coming Soon
 
