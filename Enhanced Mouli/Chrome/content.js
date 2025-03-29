@@ -153,29 +153,62 @@ function findParentBySelector(node, selector) {
   return cur;
 }
 
-document.addEventListener("__xmlrequest", (event) => {
-  const elements = JSON.parse(event.detail);
+let historyData = {};
 
-  if (!Array.isArray(elements))
-    return;
-  
-  for (let element of elements) {
-    if (typeof element !== "object" || typeof element.project !== "object" || typeof element.project.name !== "string")
-      continue;
+document.addEventListener("__xmlrequest", (event) => {
+  try {
+    const data = JSON.parse(event.detail);
     
-    projects[element.project.name] = element;
-    if (element.results && element.results.skills) {
-      skillsCache[element.project.name] = element.results.skills;
+    if (!Array.isArray(data)) return;
+    
+    const isHistoryPage = window.location.hash?.substring(1).startsWith("p/");
+    
+    if (isHistoryPage) {
+      const hashParts = window.location.hash?.substring(1).split("/");
+      const module = hashParts[2];
+      const projectSlug = hashParts[3];
+      
+      if (module && projectSlug) {
+        const key = `${module}/${projectSlug}`;
+        historyData[key] = data;
+
+        data.forEach(item => {
+          if (item && item.project && item.project.name && item.results && item.results.testRunId) {
+            const projectName = item.project.name;
+            const testRunId = item.results.testRunId;
+            projects[`${projectName}_${testRunId}`] = item;
+            
+            if (item.results.skills) {
+              skillsCache[`${projectName}_${testRunId}`] = item.results.skills;
+            }
+          }
+        });
+      }
+    } else {
+      data.forEach(element => {
+        if (typeof element !== "object" || typeof element.project !== "object" || typeof element.project.name !== "string")
+          return;
+        
+        projects[element.project.name] = element;
+        if (element.results && element.results.skills) {
+          skillsCache[element.project.name] = element.results.skills;
+        }
+      });
     }
+  } catch (ex) {
+    debugError("Error processing API response:", ex);
   }
 });
 
 async function fetchProjects() {
-  debugLog("Fetching projects...");
-  const [kind, year] = window.location.hash?.split("/");
+  const hashStr = window.location.hash?.substring(1) || "";
+  const hashParts = hashStr.split("/");
+  const kind = hashParts[0];
+  const year = hashParts[1];
+  const module = hashParts[2];
+  const projectSlug = hashParts[3];
   
-  if (kind == "p")
-    debugLog("History not yet supported!");
+  const isHistoryPage = kind === "p";
   
   try {
     const token = localStorage.getItem("argos-api.oidc-token").replace(/"/g, "");
@@ -184,7 +217,16 @@ async function fetchProjects() {
       return;
     }
     
-    const response = await fetch("https://api.epitest.eu/me/" + year, {
+    let url;
+    if (isHistoryPage && module && projectSlug) {
+      url = `https://api.epitest.eu/me/${year}/${module}/${projectSlug}`;
+      debugLog("Using history URL:", url);
+    } else {
+      url = `https://api.epitest.eu/me/${year}`;
+      debugLog("Using year URL:", url);
+    }
+    
+    const response = await fetch(url, {
       headers: {
         Authorization: "Bearer " + token
       }
@@ -194,21 +236,37 @@ async function fetchProjects() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const elements = await response.json();
+    const data = await response.json();
     
-    if (!Array.isArray(elements)) {
-      debugWarn("Projects JSON is not an array!");
+    if (!Array.isArray(data)) {
+      debugWarn("API response is not an array!");
       return;
     }
     
-    for (let element of elements) {
-      if (typeof element !== "object" || typeof element.project !== "object" || typeof element.project.name !== "string")
-        continue;
-      
-      projects[element.project.name] = element;
-      if (element.results && element.results.skills) {
-        skillsCache[element.project.name] = element.results.skills;
-      }
+    if (isHistoryPage) {
+      historyData[`${module}/${projectSlug}`] = data;
+      data.forEach(item => {
+        if (item && item.project && item.project.name && item.results && item.results.testRunId) {
+          const projectName = item.project.name;
+          const testRunId = item.results.testRunId;
+          
+          projects[`${projectName}_${testRunId}`] = item;
+          
+          if (item.results.skills) {
+            skillsCache[`${projectName}_${testRunId}`] = item.results.skills;
+          }
+        }
+      });
+    } else {
+      data.forEach(element => {
+        if (typeof element !== "object" || typeof element.project !== "object" || typeof element.project.name !== "string")
+          return;
+        
+        projects[element.project.name] = element;
+        if (element.results && element.results.skills) {
+          skillsCache[element.project.name] = element.results.skills;
+        }
+      });
     }
   } catch (error) {
     debugError("Error fetching projects:", error);
@@ -231,7 +289,7 @@ function getColorForPercentage(percentage) {
   }
 }
 
-function setEnhancedPercentage(statusElement, projectName, percentage, error_label) {
+function setEnhancedPercentage(statusElement, projectKey, percentage, error_label) {
   const color = getColorForPercentage(percentage);
   const container = document.createElement('div');
   container.className = 'epi-percentage-container';
@@ -250,11 +308,13 @@ function setEnhancedPercentage(statusElement, projectName, percentage, error_lab
     container.appendChild(errorDiv);
   }
   
+  const validPercentage = !isNaN(percentage) ? percentage : 0;
+  
   const percentageText = document.createElement('div');
   percentageText.className = 'epi-percentage-text';
   percentageText.innerHTML = `
-    <span>Passed - ${percentage}%</span>
-    <span>${percentage < 100 ? `${100 - percentage}% remaining` : 'Complete'}</span>
+    <span>Passed - ${validPercentage}%</span>
+    <span>${validPercentage < 100 ? `${100 - validPercentage}% remaining` : 'Complete'}</span>
   `;
   
   const progressBar = document.createElement('div');
@@ -262,18 +322,18 @@ function setEnhancedPercentage(statusElement, projectName, percentage, error_lab
   
   const progressFill = document.createElement('div');
   progressFill.className = 'epi-progress-fill';
-  progressFill.style.width = `${percentage}%`;
+  progressFill.style.width = `${validPercentage}%`;
   progressFill.style.backgroundColor = color;
   
   progressBar.appendChild(progressFill);
   container.appendChild(percentageText);
   container.appendChild(progressBar);
   
-  if (skillsCache[projectName]) {
-    const skills = skillsCache[projectName];
+  if (skillsCache[projectKey]) {
+    const skills = skillsCache[projectKey];
     const skillDetails = document.createElement('div');
     skillDetails.className = 'epi-skill-details';
-    skillDetails.style.display = (settings.autoExpand || expandedSkills[projectName]) ? 'block' : 'none';
+    skillDetails.style.display = (settings.autoExpand || expandedSkills[projectKey]) ? 'block' : 'none';
     
     const skillsList = Object.entries(skills).map(([skillName, skillData]) => {
       const passRate = skillData.passed / skillData.count * 100;
@@ -292,13 +352,13 @@ function setEnhancedPercentage(statusElement, projectName, percentage, error_lab
     skillDetails.innerHTML = skillsList;
     const expandBtn = document.createElement('button');
     expandBtn.className = 'epi-expand-btn';
-    expandBtn.textContent = (settings.autoExpand || expandedSkills[projectName]) ? 'Hide skill details' : 'Show skill details';
+    expandBtn.textContent = (settings.autoExpand || expandedSkills[projectKey]) ? 'Hide skill details' : 'Show skill details';
     expandBtn.onclick = (event) => {
       event.stopPropagation();
       const isHidden = skillDetails.style.display === 'none';
       skillDetails.style.display = isHidden ? 'block' : 'none';
       expandBtn.textContent = isHidden ? 'Hide skill details' : 'Show skill details';
-      expandedSkills[projectName] = isHidden;
+      expandedSkills[projectKey] = isHidden;
     };
     
     container.appendChild(expandBtn);
@@ -325,78 +385,211 @@ function setEnhancedPercentage(statusElement, projectName, percentage, error_lab
   statusElement.appendChild(container);
 }
 
+function findTestRunIdByDate(projectName, dateText) {
+  const hashParts = window.location.hash?.substring(1).split("/");
+  const module = hashParts[2];
+  const projectSlug = hashParts[3];
+  const key = `${module}/${projectSlug}`;
+  
+  const data = historyData[key];
+  if (!data || !Array.isArray(data)) return null;
+  
+  const dateMatch = dateText.match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+)/);
+  if (!dateMatch) return null;
+  
+  const day = parseInt(dateMatch[1]);
+  const month = parseInt(dateMatch[2]) - 1;
+  const year = parseInt(dateMatch[3]);
+  const hour = parseInt(dateMatch[4]);
+  const minute = parseInt(dateMatch[5]);
+  
+  const cardDate = new Date(year, month, day, hour, minute);
+  
+  let bestMatch = null;
+  let smallestDiff = Infinity;
+  
+  for (const item of data) {
+    if (item.project.name === projectName && item.results && item.results.testRunId && item.date) {
+      const runDate = new Date(item.date);
+      const diff = Math.abs(cardDate.getTime() - runDate.getTime());
+      
+      if (diff < smallestDiff) {
+        smallestDiff = diff;
+        bestMatch = item;
+      }
+    }
+  }
+  
+  return bestMatch ? bestMatch.results.testRunId : null;
+}
+
 async function updatePercentages() {
-  debugLog("Updating percentages...");
   document.querySelectorAll(".remove-on-percentage-update").forEach(e => e.remove());
   const projectStatusElements = document.querySelectorAll(".mdl-typography--title-color-contrast.mdl-cell");
   let error_label = null;
-
+  
+  const isHistoryPage = window.location.hash?.substring(1).startsWith("p/");
+  
+  if (isHistoryPage) {
+    const hashParts = window.location.hash?.substring(1).split("/");
+    const module = hashParts[2];
+    const projectSlug = hashParts[3];
+    const key = `${module}/${projectSlug}`;
+    
+    if (!historyData[key]) {
+      await fetchProjects();
+    }
+  }
+  
   for (const projectStatus of projectStatusElements) {
     if (projectStatus.getAttribute('data-epi-processed') === 'true') {
       continue;
     }
     projectStatus.setAttribute('data-epi-processed', 'true');
+    
     const computedStyle = window.getComputedStyle(projectStatus);
     const textColor = computedStyle.color;
     const rgbValues = textColor.match(/\d+/g);
     if (rgbValues && (parseInt(rgbValues[0]) !== 63 || parseInt(rgbValues[1]) !== 81 || parseInt(rgbValues[2]) !== 181)) {
-      error_label = projectStatus.textContent;
-      console.log(error_label);
+      error_label = projectStatus.textContent?.trim();
     } else {
       error_label = null;
     }
 
     const projectCardElement = findParentBySelector(projectStatus, ".mdl-card");
     if (!projectCardElement) {
-      debugLog("Project card not found!");
       continue;
     }
     
     const projectNameSpan = projectCardElement.querySelector(".mdl-card__title-text span");
     if (!projectNameSpan) {
-      debugLog("Project name span not found!");
       continue;
     }
     
     const projectName = projectNameSpan.textContent.trim();
-    if (typeof projects[projectName] === "undefined") {
-      debugLog("Project " + projectName + " not fetched yet!");
-      await fetchProjects();
-    }
     
-    const projectData = projects[projectName];
-    if (!projectData || !projectData.results || !projectData.results.skills) {
-      debugWarn(`No skill data available for ${projectName}`);
-      continue;
+    const percentageText = projectStatus.textContent || "";
+    let hasNaNPercentage = percentageText.includes("NaN") || percentageText.includes("NA");
+    
+    const percentageMatch = percentageText.match(/Passed\s*-\s*(\d+)%/);
+    let directPercentage = percentageMatch ? parseInt(percentageMatch[1]) : null;
+    
+    if (isHistoryPage) {
+      const dateElement = projectCardElement.querySelector(".mdl-typography--text-right");
+      if (!dateElement) continue;
+      
+      const dateText = dateElement.textContent.trim();
+      
+      const testRunId = findTestRunIdByDate(projectName, dateText);
+      if (!testRunId) {
+        debugWarn(`Could not find test run ID for ${projectName} on ${dateText}`);
+        continue;
+      }
+      
+      const projectKey = `${projectName}_${testRunId}`;
+      
+      if (!projects[projectKey] || !projects[projectKey].results) {
+        continue;
+      }
+      
+      if (hasNaNPercentage || error_label) {
+        setEnhancedPercentage(projectStatus, projectKey, 0, error_label);
+        continue;
+      }
+      
+      if (directPercentage !== null) {
+        setEnhancedPercentage(projectStatus, projectKey, directPercentage, error_label);
+        continue;
+      }
+      
+      if (projects[projectKey].results.skills) {
+        const skillsArr = Object.values(projects[projectKey].results.skills);
+        if (skillsArr.length === 0) {
+          setEnhancedPercentage(projectStatus, projectKey, 0, error_label);
+          continue;
+        }
+        
+        const passed = skillsArr.map(s => s.passed).reduce((prev, curr) => prev + curr, 0);
+        const count = skillsArr.map(s => s.count).reduce((prev, curr) => prev + curr, 0);
+        const percentage = count === 0 ? 0 : (passed / count * 100).toFixed(0);
+        
+        setEnhancedPercentage(projectStatus, projectKey, percentage, error_label);
+      } else {
+        setEnhancedPercentage(projectStatus, projectKey, 0, error_label);
+      }
+    } else {
+      if (typeof projects[projectName] === "undefined") {
+        await fetchProjects();
+      }
+      
+      if (hasNaNPercentage || error_label) {
+        setEnhancedPercentage(projectStatus, projectName, 0, error_label);
+        continue;
+      }
+      
+      if (directPercentage !== null) {
+        setEnhancedPercentage(projectStatus, projectName, directPercentage, error_label);
+        continue;
+      }
+      
+      const projectData = projects[projectName];
+      if (!projectData || !projectData.results) {
+        continue;
+      }
+      
+      if (projectData.results.skills) {
+        const skillsArr = Object.values(projectData.results.skills);
+        if (skillsArr.length === 0) {
+          setEnhancedPercentage(projectStatus, projectName, 0, error_label);
+          continue;
+        }
+        
+        const passed = skillsArr.map(s => s.passed).reduce((prev, curr) => prev + curr, 0);
+        const count = skillsArr.map(s => s.count).reduce((prev, curr) => prev + curr, 0);
+        const percentage = count === 0 ? 0 : (passed / count * 100).toFixed(0);
+        
+        setEnhancedPercentage(projectStatus, projectName, percentage, error_label);
+      } else {
+        setEnhancedPercentage(projectStatus, projectName, 0, error_label);
+      }
     }
-    const skillsArr = Object.values(projectData.results.skills);
-    const passed = skillsArr.map(s => s.passed).reduce((prev, curr) => prev + curr, 0);
-    const count = skillsArr.map(s => s.count).reduce((prev, curr) => prev + curr, 0);
-    const percentage = (passed / count * 100).toFixed(0);
-    setEnhancedPercentage(projectStatus, projectName, percentage, error_label);
   }
 }
 
+window.addEventListener('hashchange', () => {
+  document.querySelectorAll('[data-epi-processed="true"]').forEach(el => {
+    el.removeAttribute('data-epi-processed');
+  });
+});
+
 function initialize() {
-  debugLog("Initializing Enhanced Epitech Percentages...");
   injectStyles();
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-        updatePercentages();
+        setTimeout(updatePercentages, 300);
         return;
       }
     }
   });
   
-  observer.observe(document.querySelector("body"), { 
+  observer.observe(document.body, { 
     attributes: true, 
     subtree: true, 
     attributeFilter: ["class"] 
   });
-  document.querySelector(".mdl-layout__container").addEventListener('click', () => {
-    setTimeout(updatePercentages, 300);
-  });
+  
+  const layoutContainer = document.querySelector(".mdl-layout__container");
+  if (layoutContainer) {
+    layoutContainer.addEventListener('click', () => {
+      setTimeout(updatePercentages, 300);
+    });
+  } else {
+    document.addEventListener('click', () => {
+      setTimeout(updatePercentages, 300);
+    });
+  }
+  
   setTimeout(updatePercentages, 500);
 }
 
@@ -407,7 +600,6 @@ const inject = () => {
     if (this.onreadystatechange)
       this._onreadystatechange = this.onreadystatechange;
     
-    debugLog("Request: send");
     this.onreadystatechange = onreadystatechangereplacement;
     return send.apply(this, arguments);
   }
@@ -431,7 +623,6 @@ const inject = () => {
   }
   
   window.XMLHttpRequest.prototype.send = sendreplacement;
-  debugLog("XHR Interceptor injected");
 };
 
 initialize();
