@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Mouli Rework",
+  "version": "1.0.1",
+  "description": "Adds a button to my.epitech.eu to open a custom Moulinette view with dashboard, details and history.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://my.epitech.eu/*",
+    "https://api.epitest.eu/*"
+  ],
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://my.epitech.eu/*"],
+      "js": ["js/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "html/better_view.html",
+        "html/details.html",
+        "html/history.html",
+        "html/error.html",
+        "js/better_view.js",
+        "js/details.js",
+        "js/history.js",
+        "js/error.js",
+        "js/utilities.js",
+        "css/styles.css",
+        "icons/icon16.png",
+        "icons/icon48.png"
+      ],
+      "matches": [ "https://my.epitech.eu/*" ]
+    }
+  ]
+}

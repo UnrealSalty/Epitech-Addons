@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>History - Mouli Rework</title>
+    <link rel="icon" type="image/png" href="../icons/icon16.png" />
+    <link rel="shortcut icon" href="../icons/icon16.png" />
+    <link rel="apple-touch-icon" href="../icons/icon48.png" />
+    <link rel="stylesheet" href="../css/styles.css" />
+  </head>
+  <body>
+    <div class="preload-overlay"><div class="preload-spinner"></div></div>
+    <div class="wrapper">
+      <header>
+        <div class="logo">
+          <div class="logo-icon">
+            <img src="../icons/icon48.png" alt="Mouli Rework Icon" />
+          </div>
+          <div class="logo-text">Mouli Rework</div>
+        </div>
+        <a href="#" id="back-button" class="back-button">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M19 12H5"></path>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Back to Dashboard</span>
+        </a>
+      </header>
+      <main id="main-content">
+        <h1 class="page-title" id="history-project-name">Project History</h1>
+        <p class="page-subtitle" id="history-project-module">
+          Viewing past runs for this project
+        </p>
+        <div class="project-grid" id="history-grid-container"></div>
+      </main>
+      <footer><p>Mouli Rework • Epitech Addons Extension</p></footer>
+    </div>
+    <script src="../js/utilities.js"></script>
+    <script src="../js/history.js"></script>
+  </body>
+</html>
