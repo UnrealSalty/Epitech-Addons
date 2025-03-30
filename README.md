@@ -37,6 +37,24 @@ Supercharge your Moulinette experience with detailed skill tracking, visual prog
 **Credits**
 - [Original Extension](https://chromewebstore.google.com/detail/my-epitech-percentages/hepfpnmpnjacajnfkpmmmhhbiaggddin?pli=1)
 
+### Mouli Rework
+
+<div align="center">
+  <img src="./assets/img/mouli-rework-preview.png" alt="Mouli Rework Preview" width="600"/>
+</div>
+
+A complete redesign of the Moulinette interface with a modern dashboard, detailed test information, and project history tracking.
+
+**Features:**
+- 🖥️ **Modern Dashboard** - Clean and intuitive project overview with filtering capabilities
+- 📊 **Detailed Test Information** - Comprehensive breakdown of test results with expandable error messages
+- 📝 **Coding Style Analysis** - Visual representation of coding style violations by severity
+- 📈 **Coverage Metrics** - See branch and line coverage in a visually appealing format
+- 🕒 **Project History** - Track your progress over time with full history of test runs
+
+**Installation:**
+- [Download Mouli Rework](https://epitechaddons.com/mouli_rework)
+
 ## 🔮 Coming Soon
 
 We're working on additional browser extensions and tools to further enhance the Epitech experience. Stay tuned for updates!
@@ -53,7 +71,7 @@ We welcome contributions from all Epitech students! Whether you want to fix a bu
 
 ## 📜 License
 
-This project is licensed under the Apache V2 License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under a NO DISTRIBUTION license - see the [LICENSE](LICENSE) file for details.
 
 ## 📢 Acknowledgements
 
