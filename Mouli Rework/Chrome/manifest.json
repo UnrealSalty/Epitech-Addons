@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Mouli Rework",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Adds a button to my.epitech.eu to open a custom Moulinette view with dashboard, details and history.",
   "icons": {
     "16": "icons/icon16.png",

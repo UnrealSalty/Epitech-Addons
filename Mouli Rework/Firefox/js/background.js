@@ -1,5 +1,3 @@
-let apiTokenStore = null;
-
 async function validateToken(token) {
   if (!token) return false;
   
@@ -21,7 +19,7 @@ async function validateToken(token) {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "storeToken") {
-    apiTokenStore = message.token;
+    chrome.storage.local.set({ apiToken: message.token });
     return true;
   }
 
@@ -35,33 +33,41 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.action === "openDashboard") {
-    chrome.tabs.update({
-      url: chrome.runtime.getURL("html/better_view.html") + "?token=" + encodeURIComponent(apiTokenStore),
+    chrome.storage.local.get(["apiToken"], function(result) {
+      chrome.tabs.update({
+        url: chrome.runtime.getURL("html/better_view.html") + "?token=" + encodeURIComponent(result.apiToken || ""),
+      });
     });
     return true;
   }
 
   if (message.action === "getToken") {
-    sendResponse({
-      token: apiTokenStore,
+    chrome.storage.local.get(["apiToken"], function(result) {
+      sendResponse({
+        token: result.apiToken || null,
+      });
     });
     return true;
   }
 
   if (message.action === "openDetails") {
-    chrome.tabs.update({
-      url: chrome.runtime.getURL(
-        `html/details.html?testRunId=${message.testRunId}&token=${encodeURIComponent(apiTokenStore)}`,
-      ),
+    chrome.storage.local.get(["apiToken"], function(result) {
+      chrome.tabs.update({
+        url: chrome.runtime.getURL(
+          `html/details.html?testRunId=${message.testRunId}&token=${encodeURIComponent(result.apiToken || "")}`,
+        ),
+      });
     });
     return true;
   }
 
   if (message.action === "openHistory") {
-    chrome.tabs.update({
-      url: chrome.runtime.getURL(
-        `html/history.html?moduleCode=${message.moduleCode}&projectSlug=${message.projectSlug}&token=${encodeURIComponent(apiTokenStore)}`,
-      ),
+    chrome.storage.local.get(["apiToken"], function(result) {
+      chrome.tabs.update({
+        url: chrome.runtime.getURL(
+          `html/history.html?moduleCode=${message.moduleCode}&projectSlug=${message.projectSlug}&token=${encodeURIComponent(result.apiToken || "")}`,
+        ),
+      });
     });
     return true;
   }

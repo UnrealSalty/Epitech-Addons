@@ -151,13 +151,6 @@ function watchForTokenChanges() {
   }, 1000);
 }
 
-function startVisibilityCheck() {
-  stopVisibilityCheck();
-  checkUrlAndToggleButton();
-  visibilityCheckInterval = setInterval(checkUrlAndToggleButton, 5000);
-  watchForTokenChanges();
-}
-
 function initializeExtension() {
   addButtonStyle();
   window.addEventListener("hashchange", checkUrlAndToggleButton, false);
@@ -170,6 +163,13 @@ function initializeExtension() {
       setTimeout(checkUrlAndToggleButton, 500);
     }
   };
+}
+
+function startVisibilityCheck() {
+  stopVisibilityCheck();
+  checkUrlAndToggleButton();
+  visibilityCheckInterval = setInterval(checkUrlAndToggleButton, 5000);
+  watchForTokenChanges();
 }
 
 initializeExtension();
