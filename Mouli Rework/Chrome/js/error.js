@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loginButton.addEventListener("click", () => {
-    window.location.href = "https://my.epitech.eu/";
+    window.location.href = "https://myresults.epitest.eu/";
   });
 
   if (returnUrl) {
