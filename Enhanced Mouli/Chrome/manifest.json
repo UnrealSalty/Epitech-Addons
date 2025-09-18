@@ -12,12 +12,12 @@
     "storage"
   ],
   "host_permissions": [
-    "https://my.epitech.eu/*",
+    "https://myresults.epitest.eu/*",
     "https://api.epitest.eu/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://my.epitech.eu/*"],
+      "matches": ["https://myresults.epitest.eu/*"],
       "js": ["content.js"],
       "run_at": "document_idle"
     }

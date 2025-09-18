@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!apiToken) {
     redirectToError(
       "missing",
-      "No authentication token found. Please return to my.epitech.eu and try again.",
+      "No authentication token found. Please return to myresults.epitest.eu and try again.",
       null
     );
   } else {
