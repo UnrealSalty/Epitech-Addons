@@ -2,8 +2,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const projectGridContainer = document.getElementById("project-grid-container");
   const filterContainer = document.getElementById("filter-container");
   const mainContent = document.getElementById("main-content");
-  
+  const yearSelector = document.getElementById("year-selector");
+
   let apiToken = null;
+  let apiYear = null;
   let allProjectsData = [];
   let currentFilter = "ALL";
 
@@ -11,9 +13,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
     return params.get("token");
   }
+  function getYearFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("year") || "2024";
+  }
 
   apiToken = getTokenFromUrl();
-  
+  apiYear = getYearFromUrl();
+
+  function setYearSelectorOptions(selectedYear) {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let y = currentYear + 1; y >= 2018; y--) years.push(y.toString());
+    yearSelector.innerHTML = "";
+    years.forEach((y) => {
+      const opt = document.createElement("option");
+      opt.value = y;
+      opt.textContent = y;
+      if (y === selectedYear) opt.selected = true;
+      yearSelector.appendChild(opt);
+    });
+  }
+
+  setYearSelectorOptions(apiYear);
+
+  yearSelector.addEventListener("change", (e) => {
+    const newYear = e.target.value;
+    chrome.runtime.sendMessage({ action: "storeYear", year: newYear });
+    const params = new URLSearchParams(window.location.search);
+    params.set("year", newYear);
+    window.location.search = params.toString();
+  });
+
   if (!apiToken) {
     redirectToError(
       "missing",
@@ -21,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
       null
     );
   } else {
+    chrome.runtime.sendMessage({ action: "storeYear", year: apiYear });
     checkTokenValidity();
     initializeDashboard();
   }
@@ -30,12 +62,12 @@ document.addEventListener("DOMContentLoaded", () => {
       redirectToError("missing", "No authentication token found.", null);
       return Promise.resolve(false);
     }
-
     return new Promise((resolve) => {
       chrome.runtime.sendMessage(
         {
           action: "validateToken",
           token: apiToken,
+          year: apiYear,
         },
         (response) => {
           if (!response || !response.isValid) {
@@ -429,8 +461,12 @@ document.addEventListener("DOMContentLoaded", () => {
         action: "storeToken",
         token: apiToken
       });
+      chrome.runtime.sendMessage({
+        action: "storeYear",
+        year: apiYear
+      });
 
-      const apiUrl = `https://api.epitest.eu/me/2024`;
+      const apiUrl = `https://api.epitest.eu/me/${apiYear}`;
 
       const headers = {
         Accept: "*/*",

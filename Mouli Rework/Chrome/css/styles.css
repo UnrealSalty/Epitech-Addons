@@ -316,6 +316,46 @@ footer {
   margin-bottom: 40px;
 }
 
+
+#year-selector-container {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  padding: 0;
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+#year-selector {
+  background-color: var(--surface-light);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  min-width: 90px;
+  margin: 0;
+}
+
+#year-selector:focus,
+#year-selector:hover {
+  border-color: var(--primary-light);
+  box-shadow: 0 2px 8px rgba(93, 95, 239, 0.15);
+}
+
+#year-selector option {
+  background: var(--surface);
+  color: var(--text);
+}
+
 .project-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -1411,12 +1451,26 @@ footer {
   }
 
 }
+@media (max-width: 900px) {
+  #year-selector-container {
+    top: 16px;
+    right: 16px;
+  }
+}
 @media (max-width: 600px) {
+  #year-selector-container {
+    top: 8px;
+    right: 8px;
+  }
+  #year-selector {
+    min-width: 70px;
+    font-size: 14px;
+    padding: 6px 10px;
+  }
   .stats-grid {
     grid-template-columns: 1fr;
   }
   .style-details-list {
     max-height: 250px;
   }
-
 }

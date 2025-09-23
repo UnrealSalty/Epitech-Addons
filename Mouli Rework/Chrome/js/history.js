@@ -1,9 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+
   const historyGridContainer = document.getElementById("history-grid-container");
   const mainContent = document.getElementById("main-content");
   const backButton = document.getElementById("back-button");
 
   let apiToken = null;
+  let apiYear = null;
   let moduleCode = null;
   let projectSlug = null;
 
@@ -11,9 +13,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
     return params.get("token");
   }
+  function getYearFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("year") || "2024";
+  }
 
   apiToken = getTokenFromUrl();
-  
+  apiYear = getYearFromUrl();
+
   if (!apiToken) {
     redirectToError(
       "missing",
@@ -24,7 +31,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
     moduleCode = params.get("moduleCode");
     projectSlug = params.get("projectSlug");
-    
     if (!moduleCode || !projectSlug) {
       redirectToError(
         "missing",
@@ -33,12 +39,14 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       return;
     }
-    
     chrome.runtime.sendMessage({
       action: "storeToken",
       token: apiToken
     });
-    
+    chrome.runtime.sendMessage({
+      action: "storeYear",
+      year: apiYear
+    });
     checkTokenValidity();
     initializeHistory();
   }
@@ -48,12 +56,12 @@ document.addEventListener("DOMContentLoaded", () => {
       redirectToError("missing", "No authentication token found.", null);
       return Promise.resolve(false);
     }
-
     return new Promise((resolve) => {
       chrome.runtime.sendMessage(
         {
           action: "validateToken",
           token: apiToken,
+          year: apiYear,
         },
         (response) => {
           if (!response || !response.isValid) {
@@ -345,7 +353,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (mainContent) mainContent.style.display = "block";
 
-      const apiUrl = `https://api.epitest.eu/me/2024/${moduleCode}/${projectSlug}`;
+      const apiUrl = `https://api.epitest.eu/me/${apiYear}/${moduleCode}/${projectSlug}`;
 
       const headers = {
         Accept: "*/*",
@@ -397,7 +405,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (backButton) {
         backButton.onclick = (event) => {
           event.preventDefault();
-
           chrome.runtime.sendMessage({
             action: "openDashboard",
           });
