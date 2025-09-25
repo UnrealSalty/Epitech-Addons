@@ -12,7 +12,7 @@
     "storage"
   ],
   "host_permissions": [
-    "https://my.epitech.eu/*",
+    "https://myresults.epitest.eu/*",
     "https://api.epitest.eu/*"
   ],
   "content_scripts": [
